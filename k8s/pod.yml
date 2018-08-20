@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example-pod
+  labels:
+    app: web
+spec:
+  volumes:
+  - name: conf-data
+    emptyDir: {}
+  - name: ssl-certs
+    emptyDir: {}
+  containers:
+    - name: proxy
+      image: flaccid/tls-proxy
+      volumeMounts:
+      - name: ssl-certs
+        mountPath: /ssl-certs
+      ports:
+        - containerPort: 443
+      env:
+        - name: SELF_SIGNED
+          value: "true"
+        - name: UPSTREAM_PORT
+          value: "8080"
+        - name: ENABLE_WEBSOCKET
+          value: "true"
+    - name: example-service
+      image: jenkins/jenkins:lts
+      volumeMounts:
+      - name: conf-data
+        mountPath: /var/jenkins_home/plugins
+      ports:
+        - containerPort: 8080
+        - containerPort: 50000
+    - name: puppet
+      image: puppet/puppet-agent
+      volumeMounts:
+      - name: conf-data
+        mountPath: /conf-data
+      - name: ssl-certs
+        mountPath: /ssl-certs
+      command: ["/opt/puppetlabs/bin/puppet"]
+      args: ["agent", "--verbose", "--no-daemonize", "--summarize" ]

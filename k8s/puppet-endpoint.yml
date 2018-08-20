@@ -1,0 +1,9 @@
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: puppet
+subsets:
+  - addresses:
+      - externalName: qqbrcdg5jpd1ejl.delivery.puppetlabs.net
+    ports:
+      - port: 8140

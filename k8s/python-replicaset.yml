@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: python-example
+  labels:
+    app: python
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: python
+  template:
+    metadata:
+      labels:
+        app: python
+    spec:
+      volumes:
+      - name: conf-data
+        emptyDir: {}
+      - name: ssl-certs
+        emptyDir: {}
+      containers:
+        - name: proxy
+          image: nginx-proxy:4
+          volumeMounts:
+          - name: ssl-certs
+            mountPath: /etc/nginx/certs
+          ports:
+            - containerPort: 443
+        - name: python-service
+          image: web:2
+          volumeMounts:
+          - name: conf-data
+            mountPath: /app/conf
+          ports:
+            - containerPort: 80
+        - name: puppet
+          image: puppet/puppet-agent
+          volumeMounts:
+          - name: conf-data
+            mountPath: /conf-data
+          - name: ssl-certs
+            mountPath: /ssl-certs
+          command: ["/opt/puppetlabs/bin/puppet"]
+          args: ["agent", "--verbose", "--no-daemonize", "--summarize" ]
+  

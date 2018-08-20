@@ -1,0 +1,10 @@
+kind: "Service"
+apiVersion: "v1"
+metadata:
+  name: puppet
+spec:
+  type: ExternalName
+  externalName: ue8xe582tkkvd3o.delivery.puppetlabs.net
+  ports:
+  - protocol: TCP
+    port: 8140
